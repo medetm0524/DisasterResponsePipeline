@@ -32,6 +32,13 @@ df = pd.read_sql_table('data/DisasterResponse.db', engine)
 # load model
 model = joblib.load("../models/classifier.pkl")
 
+# parameters for graph 2
+category_columns = df.columns.tolist()[4:]
+category_sum = []
+for column in category_columns:
+    df[column] = df[column].astype(int)
+    category_sum.append(df[column].sum())
+
 
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
@@ -61,6 +68,24 @@ def index():
                 },
                 'xaxis': {
                     'title': "Genre"
+                }
+            }
+        },
+        {
+            'data': [
+                Bar(
+                    x=category_columns,
+                    y=category_sum
+                )
+            ],
+
+            'layout': {
+                'title': 'Distribution of Message categories',
+                'yaxis': {
+                    'title': "Count"
+                },
+                'xaxis': {
+                    'title': "Category"
                 }
             }
         }
