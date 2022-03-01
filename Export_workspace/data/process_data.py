@@ -11,12 +11,32 @@ import re
 from sqlalchemy import create_engine
 
 def load_data(messages_filepath, categories_filepath):
+    """
+    load_data function loads the data and merges two dataframes together based on "ID" column.
+    Parameters:
+    messages_filepath is the path for disaster_messages.csv file
+    categories_filepath is the path for disaster_categories.csv file.
+    
+    Returns:
+    merged dataframs df
+    """
+
     messages = pd.read_csv(messages_filepath)
     categories = pd.read_csv(categories_filepath)
     df = pd.merge(messages, categories, on='id')
     return df
 
 def clean_data(df):
+    """
+    clean_data function cleans df by splitting each category from category column
+    
+    Parameter:
+    df database
+    
+    Return:
+    clean database with expanded category column
+    
+    """
     categories = df['categories'].str.split(';', expand=True)
     row = categories.iloc[0,:]
     
@@ -34,16 +54,35 @@ def clean_data(df):
     categories[column] = categories[column].apply(lambda x: int(x[0]))
     
     df.drop(['categories'], axis=1, inplace=True)
+    
+    #Make sure all data is binary (0 or 1), if value is more than 1, convert it into 1
+    for column in categories:
+        categories[column] = categories[column].astype(int)
+        categories[column] = categories[column].apply(lambda x: 1 if x>1 else x)
+    
     df = pd.concat([df, categories], axis=1)
     
     return df
 
 def save_data(df, database_filename):
+    """
+    save_data function saves df in specified database
+    
+    Parameters:
+    df as clean dataframe
+    
+    database_filename is specified database path 
+    """
+    
     engine = create_engine('sqlite:///{}'.format(database_filename))
-    df.to_sql('{}'.format(database_filename), engine, index=False) 
+    df.to_sql('{}'.format(database_filename), engine, index=False, if_exists= 'replace') 
 
 
 def main():
+    """
+    Run main function that executes all functions
+    
+    """
     if len(sys.argv) == 4:
 
         messages_filepath, categories_filepath, database_filepath = sys.argv[1:]
