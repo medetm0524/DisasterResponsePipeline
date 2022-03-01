@@ -13,6 +13,7 @@
 3. Run your web app: `python run.py`
 
 ###Project Motivation
+Model helps to categorize incoming messages to an appropriate disaster relief agency.
 This project is a part of Udacity, Data Science nanodegree journey. 
 
 ###File Description
