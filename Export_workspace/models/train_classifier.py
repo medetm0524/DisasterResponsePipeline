@@ -22,6 +22,15 @@ import pickle
 from custom_transformer import StartingVerbExtractor
 
 def load_data(database_filepath):
+    """
+    Load df from database specified in parameter and split it into X and Y dataframe as numpy values
+    
+    Parameter:
+    database_filepath 
+    
+    Return
+    X, Y, and columns names as list
+    """
     engine = create_engine('sqlite:///{}'.format(database_filepath))
     df = pd.read_sql_table(database_filepath, engine)
     X = df[['message']]
@@ -56,6 +65,15 @@ def load_data(database_filepath):
     return X_np, Y_np, columns
 
 def tokenize(text):
+    """
+    tokenize function cleans, tokenize and lemmatize each word in text message
+
+    Parameter:
+    test as message
+    
+    Return 
+    clean text as list of tokens 
+    """
     # Remove punctuation characters
     text = text.translate(str.maketrans('', '', string.punctuation))
     
@@ -74,6 +92,13 @@ def tokenize(text):
 
 
 def build_model():
+    """
+    build_model is function with ML pipeline model
+    function also contains parameters for GridSearchCV 
+    
+    Return
+    cv model
+    """
     pipeline = Pipeline([
         ('features', FeatureUnion([
             ('text_pipeline', Pipeline([
@@ -97,6 +122,16 @@ def build_model():
 
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """
+    evaluate_model performs evaluation and prints classification report for each category
+
+    Parameters:
+    model is cv model 
+    X_test is X test dataset
+    y_test is Y test dataset
+    category_names is list of categories 
+    
+    """
     y_pred = model.predict(X_test)
     
     y_test_df = pd.DataFrame(Y_test, columns=category_names)
@@ -108,11 +143,25 @@ def evaluate_model(model, X_test, Y_test, category_names):
         print("Test {} in dataframe \n".format(y_test_df.columns[i]),classification_report(y_test_df.iloc[:,i], y_pred_df.iloc[:,i]))
 
 def save_model(model, model_filepath):
+    """
+    save model function that saves model as pickle file
+    
+    Parameters:
+    ML model
+    model_filepath where to save model
+    
+    Return
+    """
+    
     filename = '{}'.format(model_filepath)
     pickle.dump(model, open(filename, 'wb'))
 
 
 def main():
+    """
+    main function that executes all functions above
+    """
+    
     if len(sys.argv) == 3:
         database_filepath, model_filepath = sys.argv[1:]
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
